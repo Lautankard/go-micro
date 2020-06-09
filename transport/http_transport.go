@@ -25,6 +25,10 @@ type httpTransport struct {
 	opts Options
 }
 
+/*
+	Client主要作用是跟作为服务端的服务通讯，通过与远端addr建立连接，如果存在检测到配置了代理环境变量，则连接代理服务并将代理跟目标服务通过Method: CONNECT打通
+	中间结构为Message，Client将用户Message结构封装成request并将response封装成Message返回给用户
+*/
 type httpTransportClient struct {
 	ht       *httpTransport
 	addr     string
@@ -44,6 +48,9 @@ type httpTransportClient struct {
 	remote string
 }
 
+/*
+	Socket主要作为服务端的抽象，跟访问服务端服务的客户端进行通信处理
+*/
 type httpTransportSocket struct {
 	ht *httpTransport
 	w  http.ResponseWriter
@@ -105,7 +112,7 @@ func (h *httpTransportClient) Send(m *Message) error {
 	h.Lock()
 	h.bl = append(h.bl, req)
 	select {
-	case h.r <- h.bl[0]:
+	case h.r <- h.bl[0]: //这一步用来做什么呢
 		h.bl = h.bl[1:]
 	default:
 	}
@@ -125,7 +132,7 @@ func (h *httpTransportClient) Recv(m *Message) error {
 	}
 
 	var r *http.Request
-	if !h.dialOpts.Stream {
+	if !h.dialOpts.Stream { //如果不是流处理，获取req？
 		rc, ok := <-h.r
 		if !ok {
 			return io.EOF
@@ -188,7 +195,7 @@ func (h *httpTransportSocket) Remote() string {
 	return h.remote
 }
 
-func (h *httpTransportSocket) Recv(m *Message) error {
+func (h *httpTransportSocket) Recv(m *Message) error { //收到客户端的请求
 	if m == nil {
 		return errors.New("message passed in is nil")
 	}
@@ -417,7 +424,7 @@ func (h *httpTransportListener) Accept(fn func(Socket)) error {
 				return
 			}
 
-			conn, bufrw, err := hj.Hijack()
+			conn, bufrw, err := hj.Hijack() //如果是基于http1.x的，那么劫持http连接,自行维护此conn，conn在处理完http请求后，如果遇到c.hijacked()就会return，否则执行finishRequest自行关闭此链接
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return

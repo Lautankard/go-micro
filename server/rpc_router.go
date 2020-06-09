@@ -112,6 +112,7 @@ func isExportedOrBuiltinType(t reflect.Type) bool {
 	}
 	// PkgPath will be non-empty even for an exported type,
 	// so we need to check the type name as well.
+	//isExported(t.Name())用于判断自定义类型是否为可导出，t.PkgPath() == ""则为内置类型
 	return isExported(t.Name()) || t.PkgPath() == ""
 }
 
@@ -445,6 +446,7 @@ func (router *router) Handle(h Handler) error {
 	// Install the methods
 	for m := 0; m < s.typ.NumMethod(); m++ {
 		method := s.typ.Method(m)
+		//prepareMethod需要判断参数类型是否可以导出，不可导出wrong，返回值只可以为一个erroe
 		if mt := prepareMethod(method); mt != nil {
 			s.method[method.Name] = mt
 		}

@@ -27,7 +27,7 @@ type Options struct {
 	Advertise    string
 	Id           string
 	Version      string
-	HdlrWrappers []HandlerWrapper
+	HdlrWrappers []HandlerWrapper //Handler处理函数，类似于中间件函数，遍历为反序遍历
 	SubWrappers  []SubscriberWrapper
 
 	// RegisterCheck runs a check function before registering the service

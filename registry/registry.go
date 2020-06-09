@@ -17,7 +17,7 @@ var (
 // The registry provides an interface for service discovery
 // and an abstraction over varying implementations
 // {consul, etcd, zookeeper, ...}
-type Registry interface {
+type Registry interface { //所有的抽象的函数参数都以options样式提供，有些options仅仅通过context来传递不同的参数
 	Init(...Option) error
 	Options() Options
 	Register(*Service, ...RegisterOption) error

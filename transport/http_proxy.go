@@ -42,7 +42,7 @@ func proxyDial(conn net.Conn, addr string, proxyURL *url.URL) (_ net.Conn, err e
 	}()
 
 	r := &http.Request{
-		Method: http.MethodConnect,
+		Method: http.MethodConnect, //使用http CONNECT方法代理服务器在对应的端口上与目标站点建立一个TCP连接
 		URL:    &url.URL{Host: addr},
 		Header: map[string][]string{"User-Agent": {"micro/latest"}},
 	}
