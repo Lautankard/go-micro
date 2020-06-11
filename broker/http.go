@@ -28,6 +28,15 @@ import (
 	"golang.org/x/net/http2"
 )
 
+/*
+	这个broker的实现仅仅是为了异步吗？ 工作流程 broker开启一个http服务，用户注册subscriber，当publish一个message的时候
+	从broker消息队列中取出8个消息，并把这些消息发送给http服务，http服务接到这个请求以后，获取对应topic的subscriber，分别调用subscriber中的handler
+	去处理这个消息
+
+	如果自己实现的是基于消息队列的broker，那么需要broker维护一个producter和一个consumer，用户注册的subscriber，当publish一个message的时候brocker内部调用
+	producter去向队列中注入消息，然后用consumer监听消息并根据topic进行分发
+*/
+
 // HTTP Broker is a point to point async broker
 type httpBroker struct {
 	id      string
@@ -40,21 +49,21 @@ type httpBroker struct {
 	r registry.Registry
 
 	sync.RWMutex
-	subscribers map[string][]*httpSubscriber
+	subscribers map[string][]*httpSubscriber //维护了所有的订阅者
 	running     bool
-	exit        chan chan error
+	exit        chan chan error //exit的chan chan设计，退出的时候exit<-chan error  err <- chan err A->调用退出接口发送退出事件，并等待退出完成， B获取退出事件做退出操作，并将退出结果反馈给A， A获取结果退出
 
 	// offline message inbox
 	mtx   sync.RWMutex
-	inbox map[string][][]byte
+	inbox map[string][][]byte //维护所有压入的消息
 }
 
 type httpSubscriber struct {
 	opts  SubscribeOptions
 	id    string
 	topic string
-	fn    Handler
-	svc   *registry.Service
+	fn    Handler           //订阅者的处理函数
+	svc   *registry.Service //订阅者中为什么要包含服务信息，是为了获取订阅者订阅的服务？
 	hb    *httpBroker
 }
 
@@ -228,7 +237,7 @@ func (h *httpBroker) subscribe(s *httpSubscriber) error {
 	h.Lock()
 	defer h.Unlock()
 
-	if err := h.r.Register(s.svc, registry.RegisterTTL(registerTTL)); err != nil {
+	if err := h.r.Register(s.svc, registry.RegisterTTL(registerTTL)); err != nil { //将此类服务的节点注册进去，实现注册发现在机制
 		return err
 	}
 
@@ -661,7 +670,7 @@ func (h *httpBroker) Subscribe(topic string, handler Handler, opts ...SubscribeO
 
 	// register service
 	node := &registry.Node{
-		Id:      topic + "-" + h.id,
+		Id:      topic + "-" + h.id, //一个topic一个节点
 		Address: mnet.HostPort(addr, port),
 		Metadata: map[string]string{
 			"secure": fmt.Sprintf("%t", secure),

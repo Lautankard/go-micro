@@ -171,7 +171,7 @@ func (s *rpcServer) ServeConn(sock transport.Socket) {
 	for {
 		var msg transport.Message
 		// process inbound messages one at a time
-		if err := sock.Recv(&msg); err != nil {
+		if err := sock.Recv(&msg); err != nil { //从conn中收到客户端的请求
 			// set a global error and return
 			// we're saying we essentially can't
 			// use the socket anymore
@@ -182,7 +182,7 @@ func (s *rpcServer) ServeConn(sock transport.Socket) {
 		// check the message header for
 		// Micro-Service is a request
 		// Micro-Topic is a message
-		if t := msg.Header["Micro-Topic"]; len(t) > 0 {
+		if t := msg.Header["Micro-Topic"]; len(t) > 0 { //请求是异步的
 			// process the event
 			ev := newEvent(msg)
 			// TODO: handle the error event
@@ -532,7 +532,7 @@ func (s *rpcServer) Register() error {
 				// set the error
 				regErr = err
 				// backoff then retry
-				time.Sleep(backoff.Do(i + 1))
+				time.Sleep(backoff.Do(i + 1)) //幂等时间的等待
 				continue
 			}
 			// success so nil error
@@ -628,7 +628,7 @@ func (s *rpcServer) Register() error {
 	sort.Slice(subscriberList, func(i, j int) bool {
 		return subscriberList[i].Topic() > subscriberList[j].Topic()
 	})
-
+	//这个长度是什么鬼，为什么这么算
 	endpoints := make([]*registry.Endpoint, 0, len(handlerList)+len(subscriberList))
 
 	for _, n := range handlerList {
@@ -640,10 +640,10 @@ func (s *rpcServer) Register() error {
 	}
 
 	service := &registry.Service{
-		Name:      config.Name,
-		Version:   config.Version,
-		Nodes:     []*registry.Node{node},
-		Endpoints: endpoints,
+		Name:      config.Name,            //服务的名字
+		Version:   config.Version,         //服务版本
+		Nodes:     []*registry.Node{node}, //节点，节点名字为服务名字-id，地址和元数据
+		Endpoints: endpoints,              //服务包含的可用于调用的函数（暂时这么理解）
 	}
 
 	// get registered value
@@ -676,7 +676,7 @@ func (s *rpcServer) Register() error {
 	// router can exchange messages
 	if s.opts.Router != nil {
 		// subscribe to the topic with own name
-		sub, err := s.opts.Broker.Subscribe(config.Name, s.HandleEvent)
+		sub, err := s.opts.Broker.Subscribe(config.Name, s.HandleEvent) //注册异步处理，topic为服务名字，意味着凡是此topic事件均会发送到此处理
 		if err != nil {
 			return err
 		}
@@ -831,7 +831,7 @@ func (s *rpcServer) Start() error {
 	bname := config.Broker.String()
 
 	// connect to the broker
-	if err := config.Broker.Connect(); err != nil {
+	if err := config.Broker.Connect(); err != nil { //Broker.Connect()borker开始运行
 		if logger.V(logger.ErrorLevel, logger.DefaultLogger) {
 			log.Errorf("Broker [%s] connect error: %v", bname, err)
 		}

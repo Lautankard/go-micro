@@ -67,7 +67,7 @@ func extractValue(v reflect.Type, d int) *registry.Value {
 }
 
 func extractEndpoint(method reflect.Method) *registry.Endpoint {
-	if method.PkgPath != "" { //包名不为空代表所属包的函数，否则代表所属struct等的函数
+	if method.PkgPath != "" { //包名不为空代表所属包的内部函数，如果为空则代表method属于诸如struct的函数
 		return nil
 	}
 

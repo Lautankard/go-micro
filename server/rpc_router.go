@@ -446,7 +446,7 @@ func (router *router) Handle(h Handler) error {
 	// Install the methods
 	for m := 0; m < s.typ.NumMethod(); m++ {
 		method := s.typ.Method(m)
-		//prepareMethod需要判断参数类型是否可以导出，不可导出wrong，返回值只可以为一个erroe
+		//prepareMethod需要判断参数类型是否可以导出，不可导出wrong，method返回值只可以为一个erroe
 		if mt := prepareMethod(method); mt != nil {
 			s.method[method.Name] = mt
 		}
@@ -518,7 +518,7 @@ func (router *router) ProcessMessage(ctx context.Context, msg Message) (err erro
 
 	router.su.RLock()
 	// get the subscribers by topic
-	subs, ok := router.subscribers[msg.Topic()]
+	subs, ok := router.subscribers[msg.Topic()] //这些订阅者是to do what
 	// unlock since we only need to get the subs
 	router.su.RUnlock()
 	if !ok {
