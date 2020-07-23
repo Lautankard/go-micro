@@ -13,6 +13,7 @@ type rpcHandler struct {
 	opts      HandlerOptions
 }
 
+//将一个结构体的名字、类型、值、以及函数封装成一个handler
 func newRpcHandler(handler interface{}, opts ...HandlerOption) Handler {
 	options := HandlerOptions{
 		Metadata: make(map[string]map[string]string),
@@ -25,7 +26,7 @@ func newRpcHandler(handler interface{}, opts ...HandlerOption) Handler {
 	typ := reflect.TypeOf(handler)
 	hdlr := reflect.ValueOf(handler)
 	//Indirect获取指向元素的值，如果为指针则返回指针指向的值，否则返回本值, Name()获取的名字不包含包名
-	name := reflect.Indirect(hdlr).Type().Name()
+	name := reflect.Indirect(hdlr).Type().Name() //如果不同包名下的相同名字的类型，这会不会导致冲突 a.A和b.A最终那么都为A
 
 	var endpoints []*registry.Endpoint //这里端点代表的是方法, exam 某个结构体包含的成员函数
 

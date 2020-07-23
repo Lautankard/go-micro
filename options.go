@@ -54,7 +54,7 @@ func newOptions(opts ...Option) Options {
 		Cmd:       cmd.DefaultCmd,
 		Config:    config.DefaultConfig,
 		Client:    client.DefaultClient,
-		Server:    server.DefaultServer,
+		Server:    server.DefaultServer, //DefaultServer变量会在default.go的init函数中被覆盖为grpc.grpcServer
 		Store:     store.DefaultStore,
 		Registry:  registry.DefaultRegistry,
 		Runtime:   runtime.DefaultRuntime,

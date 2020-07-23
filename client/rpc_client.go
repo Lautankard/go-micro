@@ -109,7 +109,7 @@ func (r *rpcClient) call(ctx context.Context, node *registry.Node, req Request, 
 		dOpts = append(dOpts, transport.WithTimeout(opts.DialTimeout))
 	}
 
-	c, err := r.pool.Get(address, dOpts...)
+	c, err := r.pool.Get(address, dOpts...) //获取一个连接
 	if err != nil {
 		return errors.InternalServerError("go.micro.client", "connection error: %v", err)
 	}
@@ -146,13 +146,13 @@ func (r *rpcClient) call(ctx context.Context, node *registry.Node, req Request, 
 		}()
 
 		// send request
-		if err := stream.Send(req.Body()); err != nil {
+		if err := stream.Send(req.Body()); err != nil { //发送请求
 			ch <- err
 			return
 		}
 
 		// recv request
-		if err := stream.Recv(resp); err != nil {
+		if err := stream.Recv(resp); err != nil { //返回响应
 			ch <- err
 			return
 		}
@@ -346,7 +346,7 @@ func (r *rpcClient) next(request Request, opts CallOptions) (selector.Next, erro
 	}
 
 	// get next nodes from the selector
-	next, err := r.opts.Selector.Select(service, opts.SelectOptions...)
+	next, err := r.opts.Selector.Select(service, opts.SelectOptions...) //Selector内嵌Registry(服务发现)通过service获取服务地址，然后根据Select策略获取一个节点
 	if err != nil {
 		if err == selector.ErrNotFound {
 			return nil, errors.InternalServerError("go.micro.client", "service %s: %s", service, err.Error())
@@ -364,7 +364,7 @@ func (r *rpcClient) Call(ctx context.Context, request Request, response interfac
 		opt(&callOpts)
 	}
 
-	next, err := r.next(request, callOpts)
+	next, err := r.next(request, callOpts) //根据selector策略如轮询，获取服务的一个节点信息
 	if err != nil {
 		return err
 	}
@@ -401,7 +401,7 @@ func (r *rpcClient) Call(ctx context.Context, request Request, response interfac
 	// return errors.New("go.micro.client", "request timeout", 408)
 	call := func(i int) error {
 		// call backoff first. Someone may want an initial start delay
-		t, err := callOpts.Backoff(ctx, request, i)
+		t, err := callOpts.Backoff(ctx, request, i) //每次重试延迟的时间
 		if err != nil {
 			return errors.InternalServerError("go.micro.client", "backoff error: %v", err.Error())
 		}
@@ -438,7 +438,7 @@ func (r *rpcClient) Call(ctx context.Context, request Request, response interfac
 	ch := make(chan error, retries+1)
 	var gerr error
 
-	for i := 0; i <= retries; i++ {
+	for i := 0; i <= retries; i++ { //请求重试
 		go func(i int) {
 			ch <- call(i)
 		}(i)
@@ -634,7 +634,7 @@ func (r *rpcClient) NewMessage(topic string, message interface{}, opts ...Messag
 }
 
 func (r *rpcClient) NewRequest(service, method string, request interface{}, reqOpts ...RequestOption) Request {
-	return newRequest(service, method, request, r.opts.ContentType, reqOpts...)
+	return newRequest(service, method, request, r.opts.ContentType, reqOpts...) //将service、method、request封装为一个Request
 }
 
 func (r *rpcClient) String() string {

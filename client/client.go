@@ -15,7 +15,7 @@ type Client interface {
 	Init(...Option) error
 	Options() Options
 	NewMessage(topic string, msg interface{}, opts ...MessageOption) Message
-	NewRequest(service, endpoint string, req interface{}, reqOpts ...RequestOption) Request
+	NewRequest(service, endpoint string, req interface{}, reqOpts ...RequestOption) Request //客户端将service, endpoint，req封装成统一的Request接口
 	Call(ctx context.Context, req Request, rsp interface{}, opts ...CallOption) error
 	Stream(ctx context.Context, req Request, opts ...CallOption) (Stream, error)
 	Publish(ctx context.Context, msg Message, opts ...PublishOption) error

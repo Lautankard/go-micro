@@ -156,7 +156,7 @@ func (s *rpcServer) ServeConn(sock transport.Socket) {
 		// close all the sockets for this connection
 		pool.Close()
 
-		// close underlying socket
+		// close underlying socket  //没处理完一次请求就关闭连接
 		sock.Close()
 
 		// recover any panics

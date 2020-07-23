@@ -35,12 +35,12 @@ type Codec interface {
 }
 
 type Reader interface {
-	ReadHeader(*Message, MessageType) error
+	ReadHeader(*Message, MessageType) error //根据MessageType为请求、响应、事件去调用客户端侧/服务端侧去进行数据decode，并复制跟Message
 	ReadBody(interface{}) error
 }
 
 type Writer interface {
-	Write(*Message, interface{}) error
+	Write(*Message, interface{}) error //将Message和interface encode 并写入Writer
 }
 
 // Marshaler is a simple encoding interface used for the broker/transport

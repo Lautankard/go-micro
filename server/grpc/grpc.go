@@ -685,7 +685,7 @@ func (g *grpcServer) Register() error {
 		Name:      config.Name,
 		Version:   config.Version,
 		Nodes:     []*registry.Node{node},
-		Endpoints: endpoints,
+		Endpoints: endpoints, //存放的结构的函数
 	}
 
 	g.RLock()

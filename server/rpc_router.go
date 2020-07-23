@@ -56,6 +56,9 @@ type response struct {
 	next *response // for free list in Server
 }
 
+/*
+	router负责维护所有的service(handler) 和 subscriber，router的拥有者将请求/消息提交给router处理， router将请求/消息发布给所有的service/subscriber
+*/
 // router represents an RPC router.
 type router struct {
 	name string
@@ -462,7 +465,7 @@ func (router *router) Handle(h Handler) error {
 	return nil
 }
 
-func (router *router) ServeRequest(ctx context.Context, r Request, rsp Response) error {
+func (router *router) ServeRequest(ctx context.Context, r Request, rsp Response) error { //Client rpc的时候，会把service、method、参数封装成Request
 	sending := new(sync.Mutex)
 	service, mtype, req, argv, replyv, keepReading, err := router.readRequest(r)
 	if err != nil {

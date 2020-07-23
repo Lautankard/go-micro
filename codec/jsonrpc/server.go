@@ -32,8 +32,8 @@ type serverResponse struct {
 
 func newServerCodec(conn io.ReadWriteCloser) *serverCodec {
 	return &serverCodec{
-		dec: json.NewDecoder(conn),
-		enc: json.NewEncoder(conn),
+		dec: json.NewDecoder(conn), //Decoder从conn读取stream数据并解码
+		enc: json.NewEncoder(conn), //Encoder将数据编码并写入到conn
 		c:   conn,
 	}
 }
